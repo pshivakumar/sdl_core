@@ -112,4 +112,9 @@ void AppLaunchCtrlImpl::OnMasterReset() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_launch_data_.Clear();
 }
+
+void AppLaunchCtrlImpl::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  device_apps_launcher_.StopLaunchingAppsOnAllDevices();
+}
 }  // namespace app_launch

@@ -69,6 +69,7 @@ class AppLaunchCtrlImpl : public AppLaunchCtrl {
   void OnAppRegistered(const application_manager::Application& app) OVERRIDE;
   void OnDeviceConnected(const std::string& device_mac) OVERRIDE;
   void OnMasterReset() OVERRIDE;
+  void Stop() OVERRIDE;
 
  private:
   const AppLaunchSettings& settings_;
