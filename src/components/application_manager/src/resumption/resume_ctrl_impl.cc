@@ -492,14 +492,9 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
       application_manager_.GetPolicyHandler().IsApplicationRevoked(
           application->policy_app_id());
 
-  const mobile_apis::HMILevel::eType app_hmi_level = application->hmi_level();
-  const bool hmi_level_allow =
-      (app_hmi_level != mobile_apis::HMILevel::eType::HMI_FULL) &&
-      (app_hmi_level != mobile_apis::HMILevel::eType::HMI_LIMITED);
-
   const bool restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
                                          is_hmi_level_allowed_by_ign_cycle &&
-                                         !is_app_revoked && hmi_level_allow;
+                                         !is_app_revoked;
 
   if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
