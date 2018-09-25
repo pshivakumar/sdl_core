@@ -150,12 +150,10 @@ TYPED_TEST(MobileResponseWithUnsubscribeCommandsTest,
       this->template CreateCommand<
           typename TestFixture::CommandWithUnsubscribeType>();
 
-  auto app(this->CreateMockApp());
-
-  EXPECT_CALL(this->app_mngr_, application(_)).WillOnce(Return(app));
-  EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));
-
+  EXPECT_CALL(this->app_mngr_, UnsubscribeAppFromSoftButtons(_));
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
+
+  command->Init();
   command->Run();
 }
 
