@@ -274,7 +274,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_METHOD1(UnsubscribeAppFromSoftButtons,
-               bool(const application_manager::commands::MessageSharedPtr&
+               bool(const application_manager::commands::MessageSharedPtr
                         response_message));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));

@@ -103,7 +103,7 @@ class CommandsTest : public ::testing::Test {
                       NiceMock<MockApplicationManager> >::Result MockAppManager;
   typedef typename TypeIf<kIsNice,
                           NiceMock<MockApplication>,
-                          MockApplication>::Result MockApp;
+                          NiceMock<MockApplication> >::Result MockApp;
   typedef std::shared_ptr<MockApp> MockAppPtr;
 
   virtual ~CommandsTest() {

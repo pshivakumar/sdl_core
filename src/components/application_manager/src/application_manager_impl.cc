@@ -3615,7 +3615,7 @@ bool ApplicationManagerImpl::IsSOStructValid(
 }
 
 bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
-    const commands::MessageSharedPtr& response_message) {
+    const commands::MessageSharedPtr response_message) {
   const mobile_apis::Result::eType result_code =
       static_cast<mobile_apis::Result::eType>(
           (*response_message)[strings::msg_params][strings::result_code]

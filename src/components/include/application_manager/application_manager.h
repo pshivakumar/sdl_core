@@ -733,7 +733,7 @@ class ApplicationManager {
    * @return bool - Result of unsubscribing process.
    */
   virtual bool UnsubscribeAppFromSoftButtons(
-      const commands::MessageSharedPtr& response_message) = 0;
+      const commands::MessageSharedPtr response_message) = 0;
 };
 
 }  // namespace application_manager
