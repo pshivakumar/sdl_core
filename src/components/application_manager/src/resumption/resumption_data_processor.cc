@@ -48,6 +48,9 @@ using app_mngr::ButtonSubscriptions;
 namespace strings = app_mngr::strings;
 namespace event_engine = app_mngr::event_engine;
 
+static const char* kModuleType = "moduleType";
+static const char* kModuleData = "moduleData";
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataProcessor::ResumptionDataProcessor(
@@ -61,13 +64,13 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
+  register_callbacks_[application->app_id()] = callback;
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  register_callbacks_[application->app_id()] = callback;
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
@@ -208,6 +211,16 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
       request_ids.function_id) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
+  }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      request_ids.function_id) {
+    const auto& module_type =
+        response[app_mngr::strings::msg_params][kModuleData][kModuleType]
+            .asString();
+    if (IsRequestSuccessful(response)) {
+      status.successful_ivd_subscriptions_.push_back(module_type);
+    }
   }
 
   {
@@ -385,7 +398,11 @@ void ResumptionDataProcessor::DeleteSubmenues(
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     if (hmi_apis::FunctionID::UI_AddSubMenu ==
         request.request_ids.function_id) {
       smart_objects::SmartObjectSPtr ui_sub_menu =
@@ -441,8 +458,11 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
 
@@ -722,7 +742,12 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   smart_objects::SmartObject extension_subscriptions;
   for (auto ivi : status.succesfull_vehicle_data_subscriptions_) {
     LOG4CXX_DEBUG(logger_, "ivi " << ivi << " should be deleted");
-    extension_subscriptions[ivi] = true;
+    extension_subscriptions["ivi"][ivi] = true;
+  }
+
+  for (auto ivd : status.successful_ivd_subscriptions_) {
+    LOG4CXX_DEBUG(logger_, "ivd " << ivd << " should be deleted");
+    extension_subscriptions["ivd"][ivd] = true;
   }
 
   for (auto& extension : application->Extensions()) {
