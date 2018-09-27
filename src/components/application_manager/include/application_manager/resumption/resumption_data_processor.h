@@ -64,6 +64,13 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> successful_requests;
   std::vector<std::string> unsuccesfull_vehicle_data_subscriptions_;
   std::vector<std::string> succesfull_vehicle_data_subscriptions_;
+
+struct ResumptionHandlingCallbacks {
+  using Subscriber =
+      std::function<void(const int32_t, const ResumptionRequest)>;
+  using ConcludeResumptionCallback = std::function<void(const int32_t)>;
+  Subscriber subscriber_;
+  ConcludeResumptionCallback conclude_resumption_callback_;
 };
 
 /**
@@ -298,6 +305,13 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  bool HasNoHMIRequestsSent(const int32_t app_id);
+
+  void ConcludeResumption(const uint32_t app_id,
+                          const ApplicationResumptionStatus& status);
+
+  ResumptionHandlingCallbacks GetResumptionHandlingCallbacks();
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
